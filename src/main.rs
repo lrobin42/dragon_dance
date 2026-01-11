@@ -41,17 +41,17 @@ fn get_price_history(ticker: String) -> Vec<yahoo_finance_api::Quote> {
     quotes
 }
 
-fn calculate_simple_moving_average(array: Vec<f64>, window: i32) -> Vec<f64> {
+fn calculate_simple_moving_average(price_array: Vec<f64>, window: i32) -> Vec<f64> {
     let interval = window as usize;
     let mut index = interval - 1;
-    let length = array.len() + 1;
+    let length = price_array.len() + 1;
     let mut results = Vec::new();
 
     while index < length {
         index += 1;
 
         let start_index = index - interval;
-        let interval_slice = &array[start_index..index - 1];
+        let interval_slice = &price_array[start_index..index - 1];
         let sum: f64 = interval_slice.iter().sum();
         let interval_float = interval as f64;
         results.push(sum / interval_float);
