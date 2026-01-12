@@ -4,26 +4,27 @@ use tokio_test;
 use yahoo_finance_api as yahoo;
 
 fn main() {
-    let quote = get_price_history("NVDA".to_string());
+    let closing_prices = get_price_history("NVDA".to_string());
 
-    let mut opening_prices = Vec::new();
-    let mut closing_prices = Vec::new();
-    let mut high_prices = Vec::new();
-    let mut low_prices = Vec::new();
+    // let mut opening_prices = Vec::new();
+    // let mut closing_prices = Vec::new();
+    // let mut high_prices = Vec::new();
+    // let mut low_prices = Vec::new();
 
-    //segment the price data
-    for entry in &quote {
-        opening_prices.push(entry.open);
-        closing_prices.push(entry.close);
-        high_prices.push(entry.high);
-        low_prices.push(entry.low);
-    }
+    // //segment the price data
+    // for entry in &quote {
+    //     opening_prices.push(entry.open);
+    //     closing_prices.push(entry.close);
+    //     high_prices.push(entry.high);
+    //     low_prices.push(entry.low);
+    // }
     //calculate 20-day simple moving averages of closing prices.
     let mut moving_averages: Vec<f64> = calculate_simple_moving_average(closing_prices.clone(), 20);
 
     //calculate the standard deviation of the moving averages
     let standard_deviations = calculate_sma_std(closing_prices.clone(), 20);
 
+    //calculate the bollinger bands
     let upper_band: Vec<f64> = moving_averages
         .iter()
         .zip(standard_deviations.iter())
@@ -50,11 +51,24 @@ fn _get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
 //let time: OffsetDateTime = OffsetDateTime::from_unix_timestamp(quote.timestamp).unwrap();
 
 //Create a function to call the last 2 years of prices
-fn get_price_history(ticker: String) -> Vec<yahoo_finance_api::Quote> {
+fn get_price_history(ticker: String) -> Vec<f64> {
     let provider = yahoo::YahooConnector::new().unwrap();
     let response = tokio_test::block_on(provider.get_quote_range(&ticker, "1d", "2y")).unwrap();
     let quotes = response.quotes().unwrap();
-    quotes
+
+    let mut opening_prices = Vec::new();
+    let mut closing_prices = Vec::new();
+    let mut high_prices = Vec::new();
+    let mut low_prices = Vec::new();
+
+    //segment the price data
+    for entry in &quotes {
+        opening_prices.push(entry.open);
+        closing_prices.push(entry.close);
+        high_prices.push(entry.high);
+        low_prices.push(entry.low);
+    }
+    closing_prices
 }
 
 fn calculate_simple_moving_average(price_array: Vec<f64>, window: i32) -> Vec<f64> {
@@ -92,5 +106,3 @@ fn calculate_sma_std(price_array: Vec<f64>, window: i32) -> Vec<f64> {
     }
     std_array
 }
-
-//Create a function to calculate bollinger bands
