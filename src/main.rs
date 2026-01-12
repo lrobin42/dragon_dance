@@ -24,7 +24,11 @@ fn main() {
     //calculate the standard deviation of the moving averages
     let standard_deviations = calculate_sma_std(closing_prices.clone(), 20);
 
-    upper_band = bar.into_iter().map(|x| x + 10).collect();
+    let upper_bandt: Vec<f64> = moving_averages
+        .iter()
+        .zip(standard_deviations.iter())
+        .map(|(a, b)| a + (2.0 * b))
+        .collect();
 }
 //Create a function to get the latest price on the security
 fn _get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
