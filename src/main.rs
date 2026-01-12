@@ -24,10 +24,16 @@ fn main() {
     //calculate the standard deviation of the moving averages
     let standard_deviations = calculate_sma_std(closing_prices.clone(), 20);
 
-    let upper_bandt: Vec<f64> = moving_averages
+    let upper_band: Vec<f64> = moving_averages
         .iter()
         .zip(standard_deviations.iter())
         .map(|(a, b)| a + (2.0 * b))
+        .collect();
+
+    let lower_band: Vec<f64> = moving_averages
+        .iter()
+        .zip(standard_deviations.iter())
+        .map(|(a, b)| a - (2.0 * b))
         .collect();
 }
 //Create a function to get the latest price on the security
