@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+statistical = "1.0.0"
+statrs = "0.18.0"
+stats = "0.0.1"
 time = "0.3.44"
 tokio-test = "0.4.5"
 yahoo_finance_api = "4.1.0"

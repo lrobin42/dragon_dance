@@ -1,4 +1,5 @@
 //https://crates.io/crates/yahoo_finance_api
+use statistical::standard_deviation;
 use tokio_test;
 use yahoo_finance_api as yahoo;
 
@@ -18,7 +19,12 @@ fn main() {
         low_prices.push(entry.low);
     }
     //calculate 20-day simple moving averages of closing prices.
-    let mut moving_averages: Vec<f64> = calculate_simple_moving_average(closing_prices, 20);
+    let mut moving_averages: Vec<f64> = calculate_simple_moving_average(closing_prices.clone(), 20);
+
+    //calculate the standard deviation of the moving averages
+    let standard_deviations = calculate_sma_std(closing_prices.clone(), 20);
+
+    upper_band = bar.into_iter().map(|x| x + 10).collect();
 }
 //Create a function to get the latest price on the security
 fn _get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
@@ -57,6 +63,24 @@ fn calculate_simple_moving_average(price_array: Vec<f64>, window: i32) -> Vec<f6
         sma_array.push(sum / interval_float);
     }
     sma_array
+}
+
+//create a function to calculate the standard deviation for every 20-day period
+fn calculate_sma_std(price_array: Vec<f64>, window: i32) -> Vec<f64> {
+    let interval = window as usize;
+    let mut index = interval - 1;
+    let length = price_array.len() + 1;
+    let mut std_array = Vec::new();
+
+    while index < length {
+        index += 1;
+
+        let start_index = index - interval;
+        let interval_slice = &price_array[start_index..index - 1];
+        let std_dev = statistical::standard_deviation(interval_slice, None);
+        std_array.push(std_dev);
+    }
+    std_array
 }
 
 //Create a function to calculate bollinger bands
