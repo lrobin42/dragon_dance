@@ -6,18 +6,6 @@ use yahoo_finance_api as yahoo;
 fn main() {
     let closing_prices = get_price_history("NVDA".to_string());
 
-    // let mut opening_prices = Vec::new();
-    // let mut closing_prices = Vec::new();
-    // let mut high_prices = Vec::new();
-    // let mut low_prices = Vec::new();
-
-    // //segment the price data
-    // for entry in &quote {
-    //     opening_prices.push(entry.open);
-    //     closing_prices.push(entry.close);
-    //     high_prices.push(entry.high);
-    //     low_prices.push(entry.low);
-    // }
     //calculate 20-day simple moving averages of closing prices.
     let mut moving_averages: Vec<f64> = calculate_simple_moving_average(closing_prices.clone(), 20);
 
