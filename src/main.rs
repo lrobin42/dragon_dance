@@ -28,10 +28,11 @@ fn main() {
 //Create a function to get the latest price on the security
 fn _get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
     let provider = yahoo::YahooConnector::new().unwrap();
-    // get the latest quotes in 1 minute intervals
+
+    // get the latest quotes in 1 day intervals
     let response = tokio_test::block_on(provider.get_latest_quotes("NVDA", "1d")).unwrap();
-    // extract just the latest valid quote summery
-    // including timestamp,open,close,high,low,volume
+
+    // extract just the latest valid quote summary including timestamp,open,close,high,low,volume
     let quote = response.last_quote().unwrap();
     println!("The latest NVDA price is ${}", quote.close);
     quote
