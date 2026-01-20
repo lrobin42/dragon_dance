@@ -1,8 +1,10 @@
+use chrono::prelude::*;
+use chrono::{DateTime, Local, TimeDelta, Utc};
 use statistical::standard_deviation;
 use tokio_test;
 use yahoo_finance_api as yahoo;
 //Create a function to get the latest price on the security
-pub fn _get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
+pub fn get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
     let provider = yahoo::YahooConnector::new().unwrap();
 
     // get the latest quotes in 1 day intervals
@@ -70,4 +72,16 @@ pub fn calculate_sma_std(price_array: Vec<f64>, window: i32) -> Vec<f64> {
         std_array.push(std_dev);
     }
     std_array
+}
+pub fn get_last_twenty_days() -> Vec<NaiveDate> {
+    let today = Local::now().date_naive();
+    let mut difference = 20;
+    let mut dates = Vec::new();
+    while difference > 0 {
+        let x_days_ago = today.checked_sub_signed(TimeDelta::try_days(difference).unwrap());
+        dates.push(x_days_ago.expect("REASON"));
+        difference -= 1;
+    }
+    dates.push(today);
+    dates
 }

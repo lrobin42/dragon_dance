@@ -1,6 +1,5 @@
 //https://crates.io/crates/yahoo_finance_api
-use chrono::prelude::*;
-use chrono::{DateTime, Local, TimeDelta, Utc};
+
 use lib::*;
 mod lib;
 fn main() {
@@ -24,18 +23,6 @@ fn main() {
         .zip(standard_deviations.iter())
         .map(|(a, b)| a - (2.0 * b))
         .collect();
-    let test = get_last_twenty_days();
-    println!("{:?}", test)
-}
-pub fn get_last_twenty_days() -> Vec<NaiveDate> {
-    let today = Local::now().date_naive();
-    let mut difference = 20;
-    let mut dates = Vec::new();
-    while difference > 0 {
-        let x_days_ago = today.checked_sub_signed(TimeDelta::try_days(difference).unwrap());
-        dates.push(x_days_ago.expect("REASON"));
-        difference -= 1;
-    }
-    dates.push(today);
-    dates
+    let x_values = get_last_twenty_days(); //x-axis for plots will be the last 20 days
+    println!("{:?}", x_values)
 }
