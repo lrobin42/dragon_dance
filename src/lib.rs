@@ -20,7 +20,7 @@ pub fn get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
 //Create a function to call the last 2 years of prices
 pub fn get_price_history(ticker: String) -> Vec<f64> {
     let provider = yahoo::YahooConnector::new().unwrap();
-    let response = tokio_test::block_on(provider.get_quote_range(&ticker, "1d", "2y")).unwrap();
+    let response = tokio_test::block_on(provider.get_quote_range(&ticker, "1d", "20d")).unwrap(); //2y
     let quotes = response.quotes().unwrap();
 
     let mut opening_prices = Vec::new();
@@ -75,7 +75,7 @@ pub fn calculate_sma_std(price_array: Vec<f64>, window: i32) -> Vec<f64> {
 }
 pub fn get_last_twenty_days() -> Vec<NaiveDate> {
     let today = Local::now().date_naive();
-    let mut difference = 20;
+    let mut difference = 19;
     let mut dates = Vec::new();
     while difference > 0 {
         let x_days_ago = today.checked_sub_signed(TimeDelta::try_days(difference).unwrap());

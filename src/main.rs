@@ -33,9 +33,9 @@ fn main() {
         "closing_prices" => closing_prices,
         "lower_band" =>lower_band,
        "upper_band" => upper_band
-    ]?;
+    ]; //?;
 
-    println!("{:?}", df.head())
+    println!("{:?}", df) //.head(Some(5)))
 
     //     // Create a line chart layer
     //     let line = Chart::build(&df)?
