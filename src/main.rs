@@ -1,4 +1,7 @@
 //https://crates.io/crates/yahoo_finance_api
+use charton::prelude::*;
+use polars::prelude::*;
+use std::error::Error;
 
 use lib::*;
 mod lib;
@@ -24,5 +27,37 @@ fn main() {
         .map(|(a, b)| a - (2.0 * b))
         .collect();
     let x_values = get_last_twenty_days(); //x-axis for plots will be the last 20 days
-    println!("{:?}", x_values)
+
+    let df = df![
+        "dates" => x_values,
+        "closing_prices" => closing_prices,
+        "lower_band" =>lower_band,
+       "upper_band" => upper_band
+    ]?;
+
+    println!("{:?}", df.head())
+
+    //     // Create a line chart layer
+    //     let line = Chart::build(&df)?
+    //         .mark_line() // Line chart
+    //         .encode((
+    //             x("dates"),      // Map length column to X-axis
+    //             y("lower_band"), // Map width column to Y-axis
+    //         ))?;
+
+    //     // Create a scatter point layer
+    //     let scatter = Chart::build(&df)?
+    //         .mark_point() // Scatter plot
+    //         .encode((
+    //             x("dates"),          // Map length column to X-axis
+    //             y("closing_prices"), // Map width column to Y-axis
+    //         ))?;
+
+    //     LayeredChart::new()
+    //         .add_layer(line) // Add the line layer
+    //         .add_layer(scatter) // Add the scatter point layer
+    //         .save("./layeredchart.svg")?;
+
+    //     Ok(())
+    //
 }
