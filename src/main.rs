@@ -9,7 +9,7 @@ fn main() {
     let closing_prices = get_price_history("NVDA".to_string());
 
     //calculate 20-day simple moving averages of closing prices.
-    let mut moving_averages: Vec<f64> = calculate_simple_moving_average(closing_prices.clone(), 20);
+    let moving_averages: Vec<f64> = calculate_simple_moving_average(closing_prices.clone(), 20);
 
     //calculate the standard deviation of the moving averages
     let standard_deviations = calculate_sma_std(closing_prices.clone(), 20);
