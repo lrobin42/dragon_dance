@@ -85,3 +85,8 @@ pub fn get_last_twenty_days() -> Vec<NaiveDate> {
     dates.push(today);
     dates
 }
+
+pub fn last_twenty_entries<T: Clone>(vector: Vec<T>) -> Vec<T> {
+    let start = vector.len().saturating_sub(20);
+    vector[start..].to_vec()
+}
