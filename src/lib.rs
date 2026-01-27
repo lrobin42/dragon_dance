@@ -18,9 +18,9 @@ pub fn _get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
 //let time: OffsetDateTime = OffsetDateTime::from_unix_timestamp(quote.timestamp).unwrap();
 
 //Create a function to call the last 2 years of prices
-pub fn get_price_history(ticker: String) -> Vec<f64> {
+pub fn get_price_history(ticker: &String) -> Vec<f64> {
     let provider = yahoo::YahooConnector::new().unwrap();
-    let response = tokio_test::block_on(provider.get_quote_range(&ticker, "1d", "20d")).unwrap(); //2y
+    let response = tokio_test::block_on(provider.get_quote_range(&ticker, "1d", "40d")).unwrap(); //2y
     let quotes = response.quotes().unwrap();
 
     let mut opening_prices = Vec::new();
