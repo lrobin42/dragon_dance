@@ -5,6 +5,7 @@ use std::collections::VecDeque;
 
 use tokio_test;
 use yahoo_finance_api as yahoo;
+
 //Create a function to get the latest price on the security
 pub fn _get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
     let provider = yahoo::YahooConnector::new().unwrap();
@@ -17,7 +18,6 @@ pub fn _get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
     println!("The latest NVDA price is ${}", quote.close);
     quote
 }
-//let time: OffsetDateTime = OffsetDateTime::from_unix_timestamp(quote.timestamp).unwrap();
 
 //Create a function to call the last 2 years of prices
 pub fn get_price_history(ticker: &String) -> Vec<f64> {
