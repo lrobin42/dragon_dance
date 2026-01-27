@@ -1,10 +1,8 @@
-//https://crates.io/crates/yahoo_finance_api
 use chrono::NaiveDate;
 use plotly::common::Title;
 use plotly::layout::Axis;
 use plotly::{Plot, Scatter};
 use polars::prelude::*;
-use std::error::Error;
 
 use lib::*;
 mod lib;
@@ -33,11 +31,9 @@ fn main() {
         .collect();
 
     let x_values: Vec<NaiveDate> = get_last_twenty_days();
-    //let last_two: Vec<NaiveDate> = (*(&x_values[x_values.len() - 2..])).to_vec();
 
     let df = df![
         "dates" => &x_values,
-        //"last_two_closing_prices" => (*(&closing_prices[closing_prices.len() - 2..])).to_vec(),
         "lower_band" =>last_twenty_entries(lower_band.clone()),
         "upper_band" => last_twenty_entries(upper_band.clone())
     ];
