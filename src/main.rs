@@ -1,7 +1,8 @@
 //https://crates.io/crates/yahoo_finance_api
 use charton::prelude::*;
 use chrono::NaiveDate;
-
+use plotly::common::Title;
+use plotly::{Plot, Scatter};
 use polars::prelude::*;
 use std::error::Error;
 
@@ -12,7 +13,6 @@ fn main() {
 
     //calculate 20-day simple moving averages of closing prices.
     let moving_averages: Vec<f64> = calculate_simple_moving_average(closing_prices.clone(), 20);
-    println!("{:?}", moving_averages.len());
 
     //calculate the standard deviation of the moving averages
     let standard_deviations = calculate_sma_std(closing_prices.clone(), 20);
@@ -31,38 +31,20 @@ fn main() {
         .collect();
 
     let x_values: Vec<NaiveDate> = get_last_twenty_days();
-    let last_two: Vec<NaiveDate> = (*(&x_values[x_values.len() - 2..])).to_vec(); //x-axis for plots will be the last 2 days
+    let last_two: Vec<NaiveDate> = (*(&x_values[x_values.len() - 2..])).to_vec();
 
     let df = df![
         "dates" => last_two,
-        "closing_prices" => (*(&closing_prices[closing_prices.len() - 2..])).to_vec(),
+        "last_two_closing_prices" => (*(&closing_prices[closing_prices.len() - 2..])).to_vec(),
         "lower_band" =>lower_band,
        "upper_band" => upper_band
     ];
 
-    println!("{:?}", df)
+    println!("{:?}", df);
 
-    //     // Create a line chart layer
-    //     let line = Chart::build(&df)?
-    //         .mark_line() // Line chart
-    //         .encode((
-    //             x("dates"),      // Map length column to X-axis
-    //             y("lower_band"), // Map width column to Y-axis
-    //         ))?;
-
-    //     // Create a scatter point layer
-    //     let scatter = Chart::build(&df)?
-    //         .mark_point() // Scatter plot
-    //         .encode((
-    //             x("dates"),          // Map length column to X-axis
-    //             y("closing_prices"), // Map width column to Y-axis
-    //         ))?;
-
-    //     LayeredChart::new()
-    //         .add_layer(line) // Add the line layer
-    //         .add_layer(scatter) // Add the scatter point layer
-    //         .save("./layeredchart.svg")?;
-
-    //     Ok(())
-    //
+    let trace = Scatter::new(x_values, closing_prices).name("Line Chart");
+    let mut plot = Plot::new();
+    plot.add_trace(trace);
+    plot.set_layout(plotly::Layout::new().title(Title::from("My Line Chart")));
+    plot.show();
 }
