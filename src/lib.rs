@@ -1,6 +1,8 @@
 use chrono::prelude::*;
 use chrono::{DateTime, Local, NaiveDate, TimeDelta, Utc};
 use statistical::standard_deviation;
+use std::collections::VecDeque;
+
 use tokio_test;
 use yahoo_finance_api as yahoo;
 //Create a function to get the latest price on the security
@@ -57,22 +59,28 @@ pub fn calculate_simple_moving_average(price_array: Vec<f64>, window: i32) -> Ve
 }
 
 //create a function to calculate the standard deviation for every 20-day period
-pub fn calculate_sma_std(price_array: Vec<f64>, window: i32) -> Vec<f64> {
-    let interval = window as usize;
-    let mut index = interval - 1;
-    let length = price_array.len() + 1;
-    let mut std_array = Vec::new();
+pub fn calculate_sma_std(prices: &Vec<f64>, window: usize) -> Vec<f64> {
+    let mut std_devs = Vec::new();
+    let mut buffer: VecDeque<f64> = VecDeque::new();
 
-    while index < length {
-        index += 1;
+    for &price in prices {
+        buffer.push_back(price);
+        if buffer.len() > window {
+            buffer.pop_front();
+        }
 
-        let start_index = index - interval;
-        let interval_slice = &price_array[start_index..index - 1];
-        let std_dev = statistical::standard_deviation(interval_slice, None);
-        std_array.push(std_dev);
+        if buffer.len() == window {
+            let mean: f64 = buffer.iter().sum::<f64>() / window as f64;
+            let variance: f64 =
+                buffer.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / window as f64;
+            let std_dev = variance.sqrt();
+            std_devs.push(std_dev);
+        }
     }
-    std_array
+
+    std_devs
 }
+
 pub fn get_last_twenty_days() -> Vec<NaiveDate> {
     let today = Local::now().date_naive();
     let mut difference = 19;

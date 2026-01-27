@@ -10,20 +10,20 @@ use lib::*;
 mod lib;
 
 fn main() {
-    let ticker: String = "AMD".to_string();
+    let ticker: String = "NVDA".to_string();
     let closing_prices = get_price_history(&ticker);
 
     //calculate 20-day simple moving averages of closing prices.
     let moving_averages: Vec<f64> = calculate_simple_moving_average(closing_prices.clone(), 20);
 
     //calculate the standard deviation of the moving averages
-    let standard_deviations = calculate_sma_std(closing_prices.clone(), 20);
+    let standard_deviations = calculate_sma_std(&closing_prices.clone(), 20);
 
     //calculate the bollinger bands
     let upper_band: Vec<f64> = moving_averages
         .iter()
         .zip(standard_deviations.iter())
-        .map(|(a, b)| a + (2.0 * b))
+        .map(|(avg, std)| avg + (2.0 * std))
         .collect();
 
     let lower_band: Vec<f64> = moving_averages
@@ -44,15 +44,19 @@ fn main() {
 
     println!("{:?}", df);
 
-    let price_trace = Scatter::new(x_values.clone(), closing_prices.clone());
-    let upper_trace = Scatter::new(x_values.clone(), upper_band.clone());
-    let lower_trace = Scatter::new(x_values.clone(), lower_band.clone());
+    let price_trace = Scatter::new(x_values.clone(), closing_prices.clone()).name("Closing Price");
+    let upper_trace =
+        Scatter::new(x_values.clone(), upper_band.clone()).name("Upper Bollinger Band");
+    let lower_trace =
+        Scatter::new(x_values.clone(), lower_band.clone()).name("Lower Bollinger Band");
 
     let title = format!("{ticker} closing prices");
     let mut plot = Plot::new();
 
-    //plot closing prices
+    plot.add_trace(upper_trace);
     plot.add_trace(price_trace);
+    plot.add_trace(lower_trace);
+
     plot.set_layout(
         plotly::Layout::new()
             .title(Title::from(title))
@@ -60,21 +64,5 @@ fn main() {
             .y_axis(Axis::new().title("Price")),
     );
 
-    // plot the upper band
-    plot.add_trace(upper_trace);
-    plot.set_layout(
-        plotly::Layout::new()
-            // .title(Title::from(title))
-            .x_axis(Axis::new().title("Date"))
-            .y_axis(Axis::new().title("Price")),
-    );
-
-    plot.add_trace(lower_trace);
-    plot.set_layout(
-        plotly::Layout::new()
-            // .title(Title::from(title))
-            .x_axis(Axis::new().title("Date"))
-            .y_axis(Axis::new().title("Price")),
-    );
     plot.show();
 }
