@@ -1,10 +1,10 @@
 use chrono::prelude::*;
-use chrono::{DateTime, Local, TimeDelta, Utc};
+use chrono::{DateTime, Local, NaiveDate, TimeDelta, Utc};
 use statistical::standard_deviation;
 use tokio_test;
 use yahoo_finance_api as yahoo;
 //Create a function to get the latest price on the security
-pub fn get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
+pub fn _get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
     let provider = yahoo::YahooConnector::new().unwrap();
 
     // get the latest quotes in 1 day intervals
