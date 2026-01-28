@@ -42,19 +42,17 @@ pub fn get_price_history(ticker: &String) -> Vec<f64> {
 
 pub fn calculate_simple_moving_average(price_array: Vec<f64>, window: i32) -> Vec<f64> {
     let interval = window as usize;
-    let mut index = interval - 1;
-    let length = price_array.len() + 1;
+    let length = price_array.len();
     let mut sma_array = Vec::new();
 
-    while index < length {
-        index += 1;
-
+    // Start when we have enough data points
+    for index in interval..=length {
         let start_index = index - interval;
-        let interval_slice = &price_array[start_index..index - 1];
+        let interval_slice = &price_array[start_index..index];
         let sum: f64 = interval_slice.iter().sum();
-        let interval_float = interval as f64;
-        sma_array.push(sum / interval_float);
+        sma_array.push(sum / interval as f64);
     }
+
     sma_array
 }
 
@@ -93,7 +91,27 @@ pub fn get_last_twenty_days() -> Vec<NaiveDate> {
     dates.push(today);
     dates
 }
+pub fn calculate_sma_std(prices: &Vec<f64>, window: usize) -> Vec<f64> {
+    let mut std_devs = Vec::new();
+    let mut buffer: VecDeque<f64> = VecDeque::new();
 
+    for &price in prices {
+        buffer.push_back(price);
+        if buffer.len() > window {
+            buffer.pop_front();
+        }
+
+        if buffer.len() == window {
+            let mean: f64 = buffer.iter().sum::<f64>() / window as f64;
+            let variance: f64 =
+                buffer.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / window as f64;
+            let std_dev = variance.sqrt();
+            std_devs.push(std_dev);
+        }
+    }
+
+    std_devs
+}
 pub fn last_twenty_entries<T: Clone>(vector: Vec<T>) -> Vec<T> {
     let start = vector.len().saturating_sub(20);
     vector[start..].to_vec()
