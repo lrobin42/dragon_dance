@@ -1,37 +1,31 @@
-use chrono::{DateTime, Local, NaiveDate, TimeDelta, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use plotly::Candlestick;
+use plotly::Plot;
 use tokio_test;
 use yahoo_finance_api as yahoo;
 
 fn main() {
-    let dates = get_last_twenty_days();
     let full_history = candlestick_price_history("NVDA".to_string());
-    //println!("{:?}", full_history)
 
-    let open = full_history.open;
-    let high = full_history.high;
-    let low = full_history.low;
-    let close = full_history.close;
+    let trace = Candlestick::new(
+        full_history.dates,
+        full_history.open,
+        full_history.high,
+        full_history.low,
+        full_history.close,
+    )
+    .name("NVDA")
+    .show_legend(true);
 
-    let trace = Candlestick::new(dates, open, high, low, close)
-        .name("candle_test")
-        .show_legend(true);
-
-    let expected = serde_json::json!({
-        "type": "candlestick",
-        "x": dates,
-        "open": [5, 6],
-        "high": [9, 10],
-        "low": [3, 5],
-        "close": [6, 9],
-        "increasing": {"line": {"color": "green", "width": 1.0}},
-        "decreasing": {"line": {"color": "red", "width": 1.0}},
-        "name": "trace_1",
-        "showlegend": true
-    });
+    //Display or plot the trace
+    let mut plot = Plot::new();
+    plot.add_trace(trace);
+    plot.show();
 }
+
 #[derive(Debug, Clone)]
 pub struct PriceHistory {
+    pub dates: Vec<NaiveDate>,
     pub open: Vec<f64>,
     pub high: Vec<f64>,
     pub low: Vec<f64>,
@@ -44,6 +38,7 @@ pub fn candlestick_price_history(ticker: String) -> PriceHistory {
     let quotes = response.quotes().unwrap();
 
     let mut history = PriceHistory {
+        dates: Vec::with_capacity(quotes.len()),
         open: Vec::with_capacity(quotes.len()),
         high: Vec::with_capacity(quotes.len()),
         low: Vec::with_capacity(quotes.len()),
@@ -51,6 +46,10 @@ pub fn candlestick_price_history(ticker: String) -> PriceHistory {
     };
 
     for quote in quotes {
+        // Extract timestamp from quote and convert to NaiveDate
+        let datetime =
+            DateTime::from_timestamp(quote.timestamp as i64, 0).expect("Invalid timestamp");
+        history.dates.push(datetime.date_naive());
         history.open.push(quote.open);
         history.high.push(quote.high);
         history.low.push(quote.low);
@@ -58,17 +57,4 @@ pub fn candlestick_price_history(ticker: String) -> PriceHistory {
     }
 
     history
-}
-
-pub fn get_last_twenty_days() -> Vec<NaiveDate> {
-    let today = Local::now().date_naive();
-    let mut difference = 19;
-    let mut dates = Vec::new();
-    while difference > 0 {
-        let x_days_ago = today.checked_sub_signed(TimeDelta::try_days(difference).unwrap());
-        dates.push(x_days_ago.expect("REASON"));
-        difference -= 1;
-    }
-    dates.push(today);
-    dates
 }
