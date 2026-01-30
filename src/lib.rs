@@ -22,7 +22,7 @@ pub fn _get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
 //Create a function to call the last 2 years of prices
 pub fn get_price_history(ticker: &String) -> Vec<f64> {
     let provider = yahoo::YahooConnector::new().unwrap();
-    let response = tokio_test::block_on(provider.get_quote_range(&ticker, "1d", "40d")).unwrap(); //2y
+    let response = tokio_test::block_on(provider.get_quote_range(&ticker, "1d", "2y")).unwrap(); //2y
     let quotes = response.quotes().unwrap();
 
     let mut opening_prices = Vec::new();
@@ -40,7 +40,7 @@ pub fn get_price_history(ticker: &String) -> Vec<f64> {
     closing_prices
 }
 
-pub fn calculate_simple_moving_average(price_array: Vec<f64>, window: i32) -> Vec<f64> {
+pub fn calculate_simple_moving_average(price_array: &Vec<f64>, window: i32) -> Vec<f64> {
     let interval = window as usize;
     let length = price_array.len();
     let mut sma_array = Vec::new();
@@ -91,28 +91,44 @@ pub fn get_last_twenty_days() -> Vec<NaiveDate> {
     dates.push(today);
     dates
 }
-pub fn calculate_sma_std(prices: &Vec<f64>, window: usize) -> Vec<f64> {
-    let mut std_devs = Vec::new();
-    let mut buffer: VecDeque<f64> = VecDeque::new();
 
-    for &price in prices {
-        buffer.push_back(price);
-        if buffer.len() > window {
-            buffer.pop_front();
-        }
-
-        if buffer.len() == window {
-            let mean: f64 = buffer.iter().sum::<f64>() / window as f64;
-            let variance: f64 =
-                buffer.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / window as f64;
-            let std_dev = variance.sqrt();
-            std_devs.push(std_dev);
-        }
-    }
-
-    std_devs
-}
 pub fn last_twenty_entries<T: Clone>(vector: Vec<T>) -> Vec<T> {
     let start = vector.len().saturating_sub(20);
     vector[start..].to_vec()
+}
+
+#[derive(Debug, Clone)]
+pub struct PriceHistory {
+    pub dates: Vec<NaiveDate>,
+    pub open: Vec<f64>,
+    pub high: Vec<f64>,
+    pub low: Vec<f64>,
+    pub close: Vec<f64>,
+}
+
+pub fn candlestick_price_history(ticker: &String) -> PriceHistory {
+    let provider = yahoo::YahooConnector::new().unwrap();
+    let response = tokio_test::block_on(provider.get_quote_range(&ticker, "1d", "2y")).unwrap();
+    let quotes = response.quotes().unwrap();
+
+    let mut history = PriceHistory {
+        dates: Vec::with_capacity(quotes.len()),
+        open: Vec::with_capacity(quotes.len()),
+        high: Vec::with_capacity(quotes.len()),
+        low: Vec::with_capacity(quotes.len()),
+        close: Vec::with_capacity(quotes.len()),
+    };
+
+    for quote in quotes {
+        // Extract timestamp from quote and convert to NaiveDate
+        let datetime =
+            DateTime::from_timestamp(quote.timestamp as i64, 0).expect("Invalid timestamp");
+        history.dates.push(datetime.date_naive());
+        history.open.push(quote.open);
+        history.high.push(quote.high);
+        history.low.push(quote.low);
+        history.close.push(quote.close);
+    }
+
+    history
 }
