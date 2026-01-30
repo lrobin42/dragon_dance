@@ -9,7 +9,7 @@ use lib::*;
 mod lib;
 
 fn main() {
-    let ticker: String = "NVDA".to_string();
+    let ticker: String = "AMD".to_string();
     let candlestick_price_history = candlestick_price_history(&ticker);
     let cd_history = candlestick_price_history.clone();
     let closing_prices = candlestick_price_history.close.clone(); //get_price_history(&ticker);
@@ -25,7 +25,6 @@ fn main() {
         .zip(standard_deviations.iter())
         .map(|(avg, std)| avg + (2.0 * std))
         .collect();
-    println!("{:?}", upper_band.len());
 
     let lower_band: Vec<f64> = moving_averages
         .iter()
@@ -33,15 +32,15 @@ fn main() {
         .map(|(a, b)| a - (2.0 * b))
         .collect();
 
-    let x_values: Vec<NaiveDate> = get_last_twenty_days();
+    let x_values = &candlestick_price_history.dates;
 
-    let df = df![
-        "dates" => &x_values,
-        "lower_band" =>lower_band.clone(),
-            "upper_band" => lower_band.clone()
-    ];
+    // let df = df![
+    //     "dates" => &x_values,
+    //     "lower_band" =>lower_band.clone(),
+    //         "upper_band" => lower_band.clone()
+    // ];
 
-    println!("{:?}", df);
+    //println!("{:?}", df);
 
     let upper_trace =
         Scatter::new(x_values.clone(), upper_band.clone()).name("Upper Bollinger Band");
