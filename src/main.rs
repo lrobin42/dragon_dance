@@ -29,7 +29,7 @@ fn main() {
     let lower_band: Vec<f64> = moving_averages
         .iter()
         .zip(standard_deviations.iter())
-        .map(|(a, b)| a - (2.0 * b))
+        .map(|(avg, std)| avg - (2.0 * std))
         .collect();
 
     let x_values = &candlestick_price_history.dates;

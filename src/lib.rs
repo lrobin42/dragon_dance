@@ -56,7 +56,7 @@ pub fn calculate_simple_moving_average(price_array: &Vec<f64>, window: i32) -> V
     sma_array
 }
 
-//create a function to calculate the standard deviation for every 20-day period
+// //create a function to calculate the standard deviation for every 20-day period
 pub fn calculate_sma_std(prices: &Vec<f64>, window: usize) -> Vec<f64> {
     let mut std_devs = Vec::new();
     let mut buffer: VecDeque<f64> = VecDeque::new();
