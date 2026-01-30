@@ -65,7 +65,7 @@ fn main() {
         cd_history.low,
         cd_history.close,
     )
-    .name("NVDA")
+    .name(ticker.clone())
     .show_legend(true);
     plot.add_trace(Box::new(trace));
 
