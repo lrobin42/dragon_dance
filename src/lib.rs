@@ -56,7 +56,7 @@ pub fn calculate_simple_moving_average(price_array: &Vec<f64>, window: i32) -> V
     sma_array
 }
 
-// //create a function to calculate the standard deviation for every 20-day period
+// create a function to calculate the standard deviation for every 20-day period
 pub fn calculate_sma_std(prices: &Vec<f64>, window: usize) -> Vec<f64> {
     let mut std_devs = Vec::new();
     let mut buffer: VecDeque<f64> = VecDeque::new();
@@ -105,21 +105,23 @@ pub struct PriceHistory {
     pub low: Vec<f64>,
     pub close: Vec<f64>,
 }
-
 pub fn candlestick_price_history(ticker: &String) -> PriceHistory {
     let provider = yahoo::YahooConnector::new().unwrap();
     let response = tokio_test::block_on(provider.get_quote_range(&ticker, "1d", "2y")).unwrap();
     let quotes = response.quotes().unwrap();
 
+    // Skip first 19 quotes to align with 20-day moving average calculations
+    let quotes_slice = &quotes[19..];
+
     let mut history = PriceHistory {
-        dates: Vec::with_capacity(quotes.len()),
-        open: Vec::with_capacity(quotes.len()),
-        high: Vec::with_capacity(quotes.len()),
-        low: Vec::with_capacity(quotes.len()),
-        close: Vec::with_capacity(quotes.len()),
+        dates: Vec::with_capacity(quotes_slice.len()),
+        open: Vec::with_capacity(quotes_slice.len()),
+        high: Vec::with_capacity(quotes_slice.len()),
+        low: Vec::with_capacity(quotes_slice.len()),
+        close: Vec::with_capacity(quotes_slice.len()),
     };
 
-    for quote in quotes {
+    for quote in quotes_slice {
         // Extract timestamp from quote and convert to NaiveDate
         let datetime =
             DateTime::from_timestamp(quote.timestamp as i64, 0).expect("Invalid timestamp");
@@ -129,6 +131,5 @@ pub fn candlestick_price_history(ticker: &String) -> PriceHistory {
         history.low.push(quote.low);
         history.close.push(quote.close);
     }
-
     history
 }
