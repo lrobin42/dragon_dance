@@ -1,8 +1,5 @@
-use chrono::prelude::*;
-use chrono::{DateTime, Local, NaiveDate, TimeDelta, Utc};
-use statistical::standard_deviation;
+use chrono::{DateTime, Local, NaiveDate, TimeDelta};
 use std::collections::VecDeque;
-
 use tokio_test;
 use yahoo_finance_api as yahoo;
 
@@ -20,7 +17,7 @@ pub fn _get_latest_price(_ticker: String) -> yahoo_finance_api::Quote {
 }
 
 //Create a function to call the last 2 years of prices
-pub fn get_price_history(ticker: &String) -> Vec<f64> {
+pub fn _get_price_history(ticker: &String) -> Vec<f64> {
     let provider = yahoo::YahooConnector::new().unwrap();
     let response = tokio_test::block_on(provider.get_quote_range(&ticker, "1d", "2y")).unwrap(); //2y
     let quotes = response.quotes().unwrap();
@@ -79,7 +76,7 @@ pub fn calculate_sma_std(prices: &Vec<f64>, window: usize) -> Vec<f64> {
     std_devs
 }
 
-pub fn get_last_twenty_days() -> Vec<NaiveDate> {
+pub fn _get_last_twenty_days() -> Vec<NaiveDate> {
     let today = Local::now().date_naive();
     let mut difference = 19;
     let mut dates = Vec::new();
@@ -92,7 +89,7 @@ pub fn get_last_twenty_days() -> Vec<NaiveDate> {
     dates
 }
 
-pub fn last_twenty_entries<T: Clone>(vector: Vec<T>) -> Vec<T> {
+pub fn _last_twenty_entries<T: Clone>(vector: Vec<T>) -> Vec<T> {
     let start = vector.len().saturating_sub(20);
     vector[start..].to_vec()
 }

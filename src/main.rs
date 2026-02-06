@@ -1,19 +1,13 @@
-use chrono::NaiveDate;
+use dragon_dance::*;
 use plotly::Candlestick;
 use plotly::common::Title;
 use plotly::layout::Axis;
 use plotly::{Plot, Scatter};
-use polars::prelude::*;
-
-use lib::*;
-mod lib;
 
 fn main() {
     let ticker: String = "COST".to_string();
     let candlestick_price_history = candlestick_price_history(&ticker);
-    let mut cd_history = candlestick_price_history.clone();
-
-    //truncate the cd_history to match the moving averages data
+    let cd_history = candlestick_price_history.clone();
 
     let closing_prices = candlestick_price_history.close.clone(); //get_price_history(&ticker);
 
@@ -68,8 +62,4 @@ fn main() {
     plot.add_trace(Box::new(trace));
 
     plot.show();
-
-    println!("Closing prices length: {}", cd_history.close[19..].len());
-    println!("Moving averages length: {}", moving_averages.len());
-    println!("Upper band length: {}", upper_band.len());
 }
