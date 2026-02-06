@@ -111,7 +111,7 @@ pub fn candlestick_price_history(ticker: &String) -> PriceHistory {
     let quotes = response.quotes().unwrap();
 
     // Skip first 19 quotes to align with 20-day moving average calculations
-    let quotes_slice = &quotes[19..];
+    let quotes_slice = &quotes; //[19..];
 
     let mut history = PriceHistory {
         dates: Vec::with_capacity(quotes_slice.len()),
