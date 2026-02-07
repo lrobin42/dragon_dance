@@ -47,11 +47,9 @@ fn main() {
 
     let x_values = &candlestick_price_history.dates[19..];
 
-    let upper_trace =
-        Scatter::new(x_values.to_vec(), upper_band.clone()).name("Upper Bollinger Band");
+    let upper_trace = Scatter::new(x_values.to_vec(), upper_band.clone()).name("Upper BB");
 
-    let lower_trace =
-        Scatter::new(x_values.to_vec(), lower_band.clone()).name("Lower Bollinger Band");
+    let lower_trace = Scatter::new(x_values.to_vec(), lower_band.clone()).name("Lower BB");
 
     let title = format!("{ticker} closing prices");
     let mut plot = Plot::new();
@@ -106,12 +104,12 @@ fn main() {
                     .columns(1)
                     .pattern(plotly::layout::GridPattern::Independent),
             )
-            .x_axis(Axis::new().title("Date").domain(&[0.0, 1.0]))
-            .y_axis(Axis::new().title("Price").domain(&[0.3, 1.0])) // Top 70%
+            .x_axis(Axis::new().title("").domain(&[0.0, 1.0]))
+            .y_axis(Axis::new().title("Price").domain(&[0.68, 1.0])) // Top 70%
             .x_axis2(Axis::new().title("").domain(&[0.0, 1.0]))
-            .y_axis2(Axis::new().title("MACD").domain(&[0.15, 0.28])) // Middle 15%
+            .y_axis2(Axis::new().title("MACD").domain(&[0.15, 0.4])) // Middle 15%
             .x_axis3(Axis::new().title("").domain(&[0.0, 1.0]))
-            .y_axis3(Axis::new().title("RSI").domain(&[0.0, 0.13])),
+            .y_axis3(Axis::new().title("RSI").domain(&[0.0, 0.1])),
     );
 
     plot.show();
