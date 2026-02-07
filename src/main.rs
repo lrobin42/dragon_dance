@@ -5,13 +5,14 @@ use plotly::common::Title;
 use plotly::layout::Axis;
 use plotly::layout::LayoutGrid;
 use plotly::{Plot, Scatter};
+use ta::Next;
+use ta::indicators::RelativeStrengthIndex;
 
 fn main() {
     let ticker: String = "COST".to_string();
     let candlestick_price_history = candlestick_price_history(&ticker);
     let cd_history = candlestick_price_history.clone();
-
-    let closing_prices = candlestick_price_history.close.clone(); //get_price_history(&ticker);
+    let closing_prices = candlestick_price_history.close.clone();
 
     //calculate 20-day simple moving averages of closing prices.
     let moving_averages: Vec<f64> = calculate_simple_moving_average(&closing_prices.clone(), 20);
@@ -34,6 +35,15 @@ fn main() {
 
     //calculate the macd so we can add that to the graph
     let [macd, signal, _histogram] = calculate_macd(&ticker);
+
+    //calculate rsi
+    let mut rsi = RelativeStrengthIndex::new(14).unwrap();
+    let mut rsi_values = Vec::new();
+
+    for price in closing_prices {
+        let rsi_value = rsi.next(price);
+        rsi_values.push(rsi_value);
+    }
 
     let x_values = &candlestick_price_history.dates[19..];
 
@@ -73,12 +83,18 @@ fn main() {
         .x_axis("x2")
         .y_axis("y2");
 
+    let rsi_trace = Scatter::new((0..rsi_values.len()).collect(), rsi_values)
+        .name("RSI")
+        .x_axis("x3")
+        .y_axis("y3");
+
     // Add all traces
     plot.add_trace(upper_trace_subplot);
     plot.add_trace(lower_trace_subplot);
     plot.add_trace(Box::new(candlestick_trace));
     plot.add_trace(macd_trace);
     plot.add_trace(signal_trace);
+    plot.add_trace(rsi_trace);
 
     // Set layout with 2 rows, 1 column
     plot.set_layout(
@@ -86,52 +102,17 @@ fn main() {
             .title(Title::from(title))
             .grid(
                 LayoutGrid::new()
-                    .rows(2)
+                    .rows(3)
                     .columns(1)
                     .pattern(plotly::layout::GridPattern::Independent),
             )
             .x_axis(Axis::new().title("Date").domain(&[0.0, 1.0]))
-            .y_axis(Axis::new().title("Price").domain(&[0.7, 1.0])) // Top 70% of plot
-            .x_axis2(Axis::new().title("Date").domain(&[0.0, 1.0]))
-            .y_axis2(Axis::new().title("MACD").domain(&[0.0, 0.3])), // Bottom 30% of plot
+            .y_axis(Axis::new().title("Price").domain(&[0.3, 1.0])) // Top 70%
+            .x_axis2(Axis::new().title("").domain(&[0.0, 1.0]))
+            .y_axis2(Axis::new().title("MACD").domain(&[0.15, 0.28])) // Middle 15%
+            .x_axis3(Axis::new().title("").domain(&[0.0, 1.0]))
+            .y_axis3(Axis::new().title("RSI").domain(&[0.0, 0.13])),
     );
 
     plot.show();
-    // let mut plot = Plot::new();
-    // plot.add_trace(upper_trace);
-    // plot.add_trace(lower_trace);
-    // plot.set_layout(
-    //     plotly::Layout::new()
-    //         .title(Title::from(title))
-    //         .x_axis(Axis::new().title("Date"))
-    //         .y_axis(Axis::new().title("Price")),
-    // );
-
-    // let trace = Candlestick::new(
-    //     x_values.to_vec(),
-    //     cd_history.open[19..].to_vec(),
-    //     cd_history.high[19..].to_vec(),
-    //     cd_history.low[19..].to_vec(),
-    //     cd_history.close[19..].to_vec(),
-    // )
-    // .name(ticker.clone())
-    // .show_legend(true);
-    // plot.add_trace(Box::new(trace));
-    // plot.show();
-
-    // //macd_plot
-    // let macd_trace = Scatter::new((0..macd.len()).collect(), macd).name("MACD");
-    // let signal_trace = Scatter::new((0..signal.len()).collect(), signal).name("signal");
-    // //let histogram_trace = Scatter::new((0..histogram.len()).collect(), histogram).name("histogram");
-
-    // let mut plot = Plot::new();
-    // plot.add_trace(signal_trace);
-    // //plot.add_trace(histogram_trace);
-    // plot.set_layout(
-    //     plotly::Layout::new().title(Title::from("MACD")), //  .x_axis(Axis::new().title("Date"))
-    //                                                       //.y_axis(Axis::new().title("Price")),
-    // );
-
-    // plot.add_trace(macd_trace);
-    // plot.show()
 }
