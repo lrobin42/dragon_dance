@@ -1,5 +1,7 @@
 use chrono::{DateTime, Local, NaiveDate, TimeDelta};
 use std::collections::VecDeque;
+use ta::Next;
+use ta::indicators::MovingAverageConvergenceDivergence as Macd;
 use tokio_test;
 use yahoo_finance_api as yahoo;
 
@@ -129,4 +131,24 @@ pub fn candlestick_price_history(ticker: &String) -> PriceHistory {
         history.close.push(quote.close);
     }
     history
+}
+
+pub fn calculate_macd(ticker: &String) -> [Vec<f64>; 3] {
+    //let ticker: String = "COST".to_string();
+    let candlestick_price_history = candlestick_price_history(ticker);
+    let mut macd = Macd::new(12, 26, 9).unwrap();
+
+    // Iterate through your price history
+    let mut macd_series = Vec::new();
+    let mut signal_series = Vec::new();
+    let mut histogram_series = Vec::new();
+
+    for candle in candlestick_price_history.close {
+        // Use the closing price from each candlestick
+        let result = macd.next(candle);
+        macd_series.push(result.macd);
+        signal_series.push(result.signal);
+        histogram_series.push(result.histogram);
+    }
+    return [macd_series, signal_series, histogram_series];
 }

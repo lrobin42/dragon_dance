@@ -4,16 +4,28 @@ use ta::indicators::MovingAverageConvergenceDivergence as Macd;
 use yahoo_finance_api as yahoo;
 
 fn main() {
-    let ticker: String = "COST".to_string();
-    let candlestick_price_history = candlestick_price_history(&ticker);
+    let ticker = "COST".to_string();
+    let macd = calculate_macd(&ticker);
+}
+
+pub fn calculate_macd(ticker: &String) -> [Vec<f64>; 3] {
+    //let ticker: String = "COST".to_string();
+    let candlestick_price_history = candlestick_price_history(ticker);
     let mut macd = Macd::new(12, 26, 9).unwrap();
 
     // Iterate through your price history
+    let mut macd_series = Vec::new();
+    let mut signal_series = Vec::new();
+    let mut histogram_series = Vec::new();
+
     for candle in candlestick_price_history.close {
         // Use the closing price from each candlestick
         let result = macd.next(candle);
-        println!("{:?}", result);
+        macd_series.push(result.macd);
+        signal_series.push(result.signal);
+        histogram_series.push(result.histogram);
     }
+    return [macd_series, signal_series, histogram_series];
 }
 
 pub fn candlestick_price_history(ticker: &String) -> PriceHistory {
@@ -22,7 +34,7 @@ pub fn candlestick_price_history(ticker: &String) -> PriceHistory {
     let quotes = response.quotes().unwrap();
 
     // Skip first 19 quotes to align with 20-day moving average calculations
-    let quotes_slice = &quotes; //[19..];
+    let quotes_slice = &quotes;
 
     let mut history = PriceHistory {
         dates: Vec::with_capacity(quotes_slice.len()),
@@ -53,6 +65,7 @@ pub struct PriceHistory {
     pub low: Vec<f64>,
     pub close: Vec<f64>,
 }
+
 // Returns (macd_line, signal_line, histogram)
 /*MACD (Moving Average Convergence Divergence) is calculated from price data using three main components:
 The basic calculation:

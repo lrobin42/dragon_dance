@@ -30,6 +30,9 @@ fn main() {
         .map(|(avg, std)| avg - (2.0 * std))
         .collect();
 
+    //calculate the macd so we can add that to the graph
+    let [macd, signal, _histogram] = calculate_macd(&ticker);
+
     let x_values = &candlestick_price_history.dates[19..];
 
     let upper_trace =
@@ -60,6 +63,21 @@ fn main() {
     .name(ticker.clone())
     .show_legend(true);
     plot.add_trace(Box::new(trace));
-
     plot.show();
+
+    //macd_plot
+    let macd_trace = Scatter::new((0..macd.len()).collect(), macd).name("MACD");
+    let signal_trace = Scatter::new((0..signal.len()).collect(), signal).name("signal");
+    //let histogram_trace = Scatter::new((0..histogram.len()).collect(), histogram).name("histogram");
+
+    let mut plot = Plot::new();
+    plot.add_trace(signal_trace);
+    //plot.add_trace(histogram_trace);
+    plot.set_layout(
+        plotly::Layout::new().title(Title::from("MACD")), //  .x_axis(Axis::new().title("Date"))
+                                                          //.y_axis(Axis::new().title("Price")),
+    );
+
+    plot.add_trace(macd_trace);
+    plot.show()
 }
