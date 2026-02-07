@@ -1,7 +1,9 @@
 use dragon_dance::*;
 use plotly::Candlestick;
+use plotly::Layout;
 use plotly::common::Title;
 use plotly::layout::Axis;
+use plotly::layout::LayoutGrid;
 use plotly::{Plot, Scatter};
 
 fn main() {
@@ -42,18 +44,13 @@ fn main() {
         Scatter::new(x_values.to_vec(), lower_band.clone()).name("Lower Bollinger Band");
 
     let title = format!("{ticker} closing prices");
-
     let mut plot = Plot::new();
-    plot.add_trace(upper_trace);
-    plot.add_trace(lower_trace);
-    plot.set_layout(
-        plotly::Layout::new()
-            .title(Title::from(title))
-            .x_axis(Axis::new().title("Date"))
-            .y_axis(Axis::new().title("Price")),
-    );
 
-    let trace = Candlestick::new(
+    // Price plot traces (assigned to first subplot)
+    let upper_trace_subplot = upper_trace.x_axis("x").y_axis("y");
+    let lower_trace_subplot = lower_trace.x_axis("x").y_axis("y");
+
+    let candlestick_trace = Candlestick::new(
         x_values.to_vec(),
         cd_history.open[19..].to_vec(),
         cd_history.high[19..].to_vec(),
@@ -61,23 +58,80 @@ fn main() {
         cd_history.close[19..].to_vec(),
     )
     .name(ticker.clone())
-    .show_legend(true);
-    plot.add_trace(Box::new(trace));
-    plot.show();
+    .show_legend(true)
+    .x_axis("x")
+    .y_axis("y");
 
-    //macd_plot
-    let macd_trace = Scatter::new((0..macd.len()).collect(), macd).name("MACD");
-    let signal_trace = Scatter::new((0..signal.len()).collect(), signal).name("signal");
-    //let histogram_trace = Scatter::new((0..histogram.len()).collect(), histogram).name("histogram");
+    // MACD plot traces (assigned to second subplot)
+    let macd_trace = Scatter::new((0..macd.len()).collect(), macd)
+        .name("MACD")
+        .x_axis("x2")
+        .y_axis("y2");
 
-    let mut plot = Plot::new();
+    let signal_trace = Scatter::new((0..signal.len()).collect(), signal)
+        .name("Signal")
+        .x_axis("x2")
+        .y_axis("y2");
+
+    // Add all traces
+    plot.add_trace(upper_trace_subplot);
+    plot.add_trace(lower_trace_subplot);
+    plot.add_trace(Box::new(candlestick_trace));
+    plot.add_trace(macd_trace);
     plot.add_trace(signal_trace);
-    //plot.add_trace(histogram_trace);
+
+    // Set layout with 2 rows, 1 column
     plot.set_layout(
-        plotly::Layout::new().title(Title::from("MACD")), //  .x_axis(Axis::new().title("Date"))
-                                                          //.y_axis(Axis::new().title("Price")),
+        Layout::new()
+            .title(Title::from(title))
+            .grid(
+                LayoutGrid::new()
+                    .rows(2)
+                    .columns(1)
+                    .pattern(plotly::layout::GridPattern::Independent),
+            )
+            .x_axis(Axis::new().title("Date").domain(&[0.0, 1.0]))
+            .y_axis(Axis::new().title("Price").domain(&[0.7, 1.0])) // Top 70% of plot
+            .x_axis2(Axis::new().title("Date").domain(&[0.0, 1.0]))
+            .y_axis2(Axis::new().title("MACD").domain(&[0.0, 0.3])), // Bottom 30% of plot
     );
 
-    plot.add_trace(macd_trace);
-    plot.show()
+    plot.show();
+    // let mut plot = Plot::new();
+    // plot.add_trace(upper_trace);
+    // plot.add_trace(lower_trace);
+    // plot.set_layout(
+    //     plotly::Layout::new()
+    //         .title(Title::from(title))
+    //         .x_axis(Axis::new().title("Date"))
+    //         .y_axis(Axis::new().title("Price")),
+    // );
+
+    // let trace = Candlestick::new(
+    //     x_values.to_vec(),
+    //     cd_history.open[19..].to_vec(),
+    //     cd_history.high[19..].to_vec(),
+    //     cd_history.low[19..].to_vec(),
+    //     cd_history.close[19..].to_vec(),
+    // )
+    // .name(ticker.clone())
+    // .show_legend(true);
+    // plot.add_trace(Box::new(trace));
+    // plot.show();
+
+    // //macd_plot
+    // let macd_trace = Scatter::new((0..macd.len()).collect(), macd).name("MACD");
+    // let signal_trace = Scatter::new((0..signal.len()).collect(), signal).name("signal");
+    // //let histogram_trace = Scatter::new((0..histogram.len()).collect(), histogram).name("histogram");
+
+    // let mut plot = Plot::new();
+    // plot.add_trace(signal_trace);
+    // //plot.add_trace(histogram_trace);
+    // plot.set_layout(
+    //     plotly::Layout::new().title(Title::from("MACD")), //  .x_axis(Axis::new().title("Date"))
+    //                                                       //.y_axis(Axis::new().title("Price")),
+    // );
+
+    // plot.add_trace(macd_trace);
+    // plot.show()
 }
