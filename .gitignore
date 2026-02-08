@@ -1,2 +1,1 @@
-/target
-/gui/target/debug
+**/target/
