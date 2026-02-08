@@ -5,4 +5,3 @@ edition = "2024"
 
 [dependencies]
 eframe = "0.33.3"
-iced = "0.14.0"
