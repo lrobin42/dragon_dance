@@ -105,11 +105,11 @@ fn main() {
                     .pattern(plotly::layout::GridPattern::Independent),
             )
             .x_axis(Axis::new().title("").domain(&[0.0, 1.0]))
-            .y_axis(Axis::new().title("Price").domain(&[0.68, 1.0])) // Top 70%
+            .y_axis(Axis::new().title("Price").domain(&[0.68, 1.0])) // Top 68%
             .x_axis2(Axis::new().title("").domain(&[0.0, 1.0]))
-            .y_axis2(Axis::new().title("MACD").domain(&[0.15, 0.4])) // Middle 15%
+            .y_axis2(Axis::new().title("MACD").domain(&[0.15, 0.4]))
             .x_axis3(Axis::new().title("").domain(&[0.0, 1.0]))
-            .y_axis3(Axis::new().title("RSI").domain(&[0.0, 0.1])),
+            .y_axis3(Axis::new().title("RSI").domain(&[0.0, 0.1])), //Bottom 10% of figure
     );
 
     plot.show();
