@@ -1,0 +1,11 @@
+[package]
+name = "chains"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+polars = "0.53.0"
+tokio = { version = "1.49.0", features = ["macros", "rt-multi-thread"] }
+chrono = { version = "0.4.41", features = ["std"] }
+yfinance-rs = "0.1.0"
+anyhow = "1.0.102"
